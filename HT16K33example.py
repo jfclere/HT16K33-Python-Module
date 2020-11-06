@@ -24,11 +24,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import time, sys, smbus
 from HT16K33 import HT16K33, HT16K33_LED_MATRIX, HT16K33_7_SEGMENT
 
-mode = 1
+mode = 0
 
 if mode == 0:
 
-    ledMatrix = HT16K33_LED_MATRIX(0x70, [8,8])
+    ledMatrix = HT16K33_LED_MATRIX(0x70, [8,8], adafruit = True)
     ledMatrix.fill_matrix(1)
     ledMatrix.show_matrix()
     time.sleep(2)
@@ -46,6 +46,7 @@ if mode == 0:
                         0, 0, 1, 1, 1, 1, 0, 0,
                         0, 0, 0, 0, 0, 0, 0, 0]
     ledMatrix.show_matrix()
+    #ledMatrix.show_matrix_adafruit_backpack()
     time.sleep(2)
     ledMatrix.invert_matrix()
     ledMatrix.show_matrix()
@@ -54,14 +55,14 @@ if mode == 0:
     ledMatrix.show_matrix()
     time.sleep(2)
 
-    #Keyscan demo
+    """#Keyscan demo
     ledMatrix.set_interrupt(True, 'HIGH')
     startTime = time.time()
     loopLength = 10
 
     while (time.time()-startTime)<loopLength:
         print(ledMatrix.read_keyscan())       
-        time.sleep(0.2)
+        time.sleep(0.2)"""
 
     #Turn HT16K33 off
     ledMatrix.set_interrupt(False, 'HIGH')

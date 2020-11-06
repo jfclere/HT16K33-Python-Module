@@ -123,7 +123,7 @@ class HT16K33:
 
 class HT16K33_LED_MATRIX(HT16K33):
 
-    def __init__(self, i2cAddress, size = [8, 8]):
+    def __init__(self, i2cAddress, size = [8, 8], adafruit = False):
 
         # call super class HT16K33 to set up common
         # variables and methods
@@ -131,6 +131,7 @@ class HT16K33_LED_MATRIX(HT16K33):
 
         self.cols = size[0]  # number of columns in LED matrix
         self.rows = size[1]  # number of rows in LED matrix
+        self.adafruit = adafruit
 
         # set up list to hold the individual LED states
         # 0 - off, 1 - on
@@ -213,10 +214,16 @@ class HT16K33_LED_MATRIX(HT16K33):
                 column += 1
                 #print(hex(data_to_write[row]))
 
+        if self.adafruit == True:
+            for i in range(len(data_to_write)):
+                tempValue = (data_to_write[i] & 0x01) << 7
+                data_to_write[i] = data_to_write[i] >> 1 | tempValue
+
         # write values to display/HT16K33
         self.bus.write_i2c_block_data(self.i2cAddress, 0x00, data_to_write)   
 
         return
+
 
 class HT16K33_7_SEGMENT(HT16K33):
 
