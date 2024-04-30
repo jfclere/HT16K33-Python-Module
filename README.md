@@ -30,9 +30,10 @@ Common functions
 - read_keyscan()
 
 LED Matrix functions
-- intialization: ledMatrix = HT16K33_LED_MATRIX(i2cAddress, size = [8, 8], adafruit = False)
+- intialization: ledMatrix = HT16K33_LED_MATRIX(i2cAddress, i2cBus = 1, size = [8, 8], adafruit = False)
 - fill_matrix(value = 1)
 - invert_matrix()
+- rotate_matrix(numTurns = 1)
 - show_matrix()
 
 4 Digit 7 Segment functions
@@ -41,6 +42,10 @@ LED Matrix functions
 
 November 5, 2020 Update
 - added functionality to handle Adafruit 8x8 matrix backpacks
+
+April 29, 2024 Update
+- added i2c bus option
+- added __setitem__ and rotate_matrix functs for LED matrix
 
 Notes:
 The HT16K33 data sheet is useful especially with connection diagrams etc

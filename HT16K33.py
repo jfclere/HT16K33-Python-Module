@@ -2,10 +2,11 @@
 """HT16K33, python module for the ht16k33 LED matrix driver
 
 created September 6, 2020
-last modified September 16, 2020"""
-
+modified September 16, 2020
+modified December 20, 2023 - added __setitem__ and rotate_matrix functs for LED matrix
+modified April 29, 2024 - added i2c bus option """
 """
-Copyright 2020 Owain Martin
+Copyright 2020, 2023, 2024 Owain Martin
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -22,14 +23,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 import time, sys, smbus
+#import numpy as np
 
 class HT16K33:
 
-    def __init__(self, i2cAddress):
+    def __init__(self, i2cAddress, i2cBus = 1):
 
         # set up i2c connection
         self.i2cAddress = i2cAddress
-        self.bus =smbus.SMBus(1)
+        self.bus =smbus.SMBus(i2cBus)
 
         # set initial HT16K33 state
         self.set_system_oscillator('ON')
@@ -123,11 +125,11 @@ class HT16K33:
 
 class HT16K33_LED_MATRIX(HT16K33):
 
-    def __init__(self, i2cAddress, size = [8, 8], adafruit = False):
+    def __init__(self, i2cAddress, i2cBus = 1, size = [8, 8], adafruit = False):
 
         # call super class HT16K33 to set up common
         # variables and methods
-        HT16K33.__init__(self, i2cAddress)        
+        HT16K33.__init__(self, i2cAddress, i2cBus)        
 
         self.cols = size[0]  # number of columns in LED matrix
         self.rows = size[1]  # number of rows in LED matrix
@@ -169,11 +171,55 @@ class HT16K33_LED_MATRIX(HT16K33):
 
         return
 
+    def __setitem__(self, key, value):
+        """__setitem__, function to set an indivdual or
+        a range of LEDs values in the matrix list"""
+        
+        self.matrix[key] = value        
+            
+        return
+    
+    def __getitem__(self, key):
+        """__getitem__, function to get/return an indivdual or
+        a range of LEDs values from the matrix list"""
+        
+        return self.matrix[key]
+    
+    """def rotate_matrix(self, numTimes = 1):
+        #rotate_matrix, function to rotate the LED matrix values
+        #90 degrees counter clockwise numTimes
+
+        print(self.rows, self.cols)
+        
+        tempArray = np.array(self.matrix).reshape(self.rows, self.cols)
+        tempArray = np.rot90(tempArray, numTimes, axes = (0,1))
+        
+        self.matrix = list(tempArray.flatten())
+
+        work in progress
+        
+        return"""
+
+    def rotate_matrix(self, numTurns = 1):
+        """rotate_matrix, function to rotate the LED matrix
+        90 degrees clockwise per turn.  For 8x8 matrixes"""              
+        
+        for n in range(numTurns):
+            tempMatrix = [0 for i in range(64)] 
+            led = 0
+            for j in range(7, -1, -1):
+                for i in range(0,8):
+                    tempMatrix[j+i*8] = self.matrix[led]
+                    led += 1
+            self.matrix = tempMatrix
+            
+        return
+
     def show_matrix(self):
         """show_matrix, function to write data to the display to
         show what is stored in self.matrix, the list holding what
         all the individual LED states should be."""
-
+        
         matrix = self.matrix
         cols =  self.cols
         rows = self.rows
@@ -219,7 +265,7 @@ class HT16K33_LED_MATRIX(HT16K33):
                 tempValue = (data_to_write[i] & 0x01) << 7
                 data_to_write[i] = data_to_write[i] >> 1 | tempValue
 
-        # write values to display/HT16K33
+        # write values to display/HT16K33        
         self.bus.write_i2c_block_data(self.i2cAddress, 0x00, data_to_write)   
 
         return
@@ -227,11 +273,11 @@ class HT16K33_LED_MATRIX(HT16K33):
 
 class HT16K33_7_SEGMENT(HT16K33):
 
-    def __init__(self, i2cAddress, justification = "RIGHT"):
+    def __init__(self, i2cAddress, i2cBus = 1, justification = "RIGHT"):
 
         # call super class HT16K33 to set up common
         # variables and methods
-        HT16K33.__init__(self, i2cAddress)
+        HT16K33.__init__(self, i2cAddress, i2cBus)
 
         # set display justification
         self.set_justification(justification)        
@@ -329,11 +375,11 @@ class HT16K33_7_SEGMENT(HT16K33):
 
 if __name__ == "__main__":
 
-    mode = 1
+    mode = 0
 
     if mode == 0:
 
-        ledMatrix = HT16K33_LED_MATRIX(0x70, [8,8])
+        ledMatrix = HT16K33_LED_MATRIX(0x70, 1, [8,8], True)
         ledMatrix.fill_matrix(1)
         ledMatrix.show_matrix()
         time.sleep(2)
@@ -375,7 +421,7 @@ if __name__ == "__main__":
 
     elif mode == 1:
 
-        sevenSegment = HT16K33_7_SEGMENT(0x70)
+        sevenSegment = HT16K33_7_SEGMENT(0x70, 1)
         sevenSegment.set_brightness(7)
         #sevenSegment.set_justification("LEFT")        
         #sevenSegment.write_numbers("1234") # raises error as intended

@@ -2,7 +2,8 @@
 """HT16K33example, example file for use with the HT16K33 python module.
 
 created September 18, 2020
-last modified September 18, 2020"""
+modified September 18, 2020
+modified April 29, 2024 - added i2c bus option"""
 
 """
 Copyright 2020 Owain Martin
@@ -28,7 +29,7 @@ mode = 0
 
 if mode == 0:
 
-    ledMatrix = HT16K33_LED_MATRIX(0x70, [8,8], adafruit = True)
+    ledMatrix = HT16K33_LED_MATRIX(0x70, 1, size = [8,8], adafruit = True)
     ledMatrix.fill_matrix(1)
     ledMatrix.show_matrix()
     time.sleep(2)
@@ -45,8 +46,7 @@ if mode == 0:
                         0, 1, 0, 0, 0, 0, 1, 0,
                         0, 0, 1, 1, 1, 1, 0, 0,
                         0, 0, 0, 0, 0, 0, 0, 0]
-    ledMatrix.show_matrix()
-    #ledMatrix.show_matrix_adafruit_backpack()
+    ledMatrix.show_matrix()    
     time.sleep(2)
     ledMatrix.invert_matrix()
     ledMatrix.show_matrix()
@@ -54,6 +54,24 @@ if mode == 0:
     ledMatrix.invert_matrix()
     ledMatrix.show_matrix()
     time.sleep(2)
+
+    for i in range(4):        
+        ledMatrix.rotate_matrix(1)
+        ledMatrix.show_matrix()
+        time.sleep(2)
+
+    ledMatrix.fill_matrix(0)
+    ledMatrix[0] = 1
+    ledMatrix[4] = 1
+    ledMatrix.show_matrix()
+    time.sleep(2)
+    ledMatrix[8:16] = [1]*8
+    ledMatrix[18] = 1
+    ledMatrix[26] = 1
+    ledMatrix[34:36] = [1]*2
+    ledMatrix.show_matrix()
+    time.sleep(2)
+    
 
     """#Keyscan demo
     ledMatrix.set_interrupt(True, 'HIGH')
@@ -71,7 +89,7 @@ if mode == 0:
 
 elif mode == 1:
 
-    sevenSegment = HT16K33_7_SEGMENT(0x70)
+    sevenSegment = HT16K33_7_SEGMENT(0x70, 1)
     sevenSegment.set_brightness(7)
     sevenSegment.set_justification("LEFT")    
     sevenSegment.write_numbers(-256.7)
